@@ -62,40 +62,118 @@ class NfcService {
     }
   }
 
-  /// Extract NFC card UID from tag data
-  String? _extractCardId(NfcTag tag) {
-    try {
-      final data = _castTagData(tag);
-      debugPrint('Raw NFC tag data: $data');
+/// Extract NFC card UID from tag data
+String? _extractCardId(NfcTag tag) {
+  try {
+    final data = _castTagData(tag);
+    debugPrint('Raw NFC tag data keys: ${data.keys.toList()}');
+    debugPrint('Full NFC tag data: $data');
 
-
-      if (data.containsKey('nfca')) {
-        final id = List<int>.from(data['nfca']['identifier']);
-        return _formatCardId(id);
+    // Try MifareClassic first (most common for student IDs)
+    if (data.containsKey('mifareClassic')) {
+      try {
+        final identifier = data['mifareClassic']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('MifareClassic identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading MifareClassic: $e');
       }
-      if (data.containsKey('nfcb')) {
-        final id = List<int>.from(data['nfcb']['identifier']);
-        return _formatCardId(id);
-      }
-      if (data.containsKey('isodep')) {
-        final id = List<int>.from(data['isodep']['identifier']);
-        return _formatCardId(id);
-      }
-      if (data.containsKey('nfcf')) {
-        final id = List<int>.from(data['nfcf']['identifier']);
-        return _formatCardId(id);
-      }
-      if (data.containsKey('nfcv')) {
-        final id = List<int>.from(data['nfcv']['identifier']);
-        return _formatCardId(id);
-      }
-
-      return null;
-    } catch (e) {
-      debugPrint('Error extracting card ID: $e');
-      return null;
     }
+
+    // Try NfcA (works for MIFARE Classic and Ultralight)
+    if (data.containsKey('nfca')) {
+      try {
+        final identifier = data['nfca']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('NfcA identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading NfcA: $e');
+      }
+    }
+
+    // Try MifareUltralight
+    if (data.containsKey('mifareUltralight')) {
+      try {
+        final identifier = data['mifareUltralight']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('MifareUltralight identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading MifareUltralight: $e');
+      }
+    }
+
+    // Try IsoDep (MIFARE DESFire)
+    if (data.containsKey('isodep')) {
+      try {
+        final identifier = data['isodep']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('IsoDep identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading IsoDep: $e');
+      }
+    }
+
+    // Try NfcB
+    if (data.containsKey('nfcb')) {
+      try {
+        final identifier = data['nfcb']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('NfcB identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading NfcB: $e');
+      }
+    }
+
+    // Try NfcF
+    if (data.containsKey('nfcf')) {
+      try {
+        final identifier = data['nfcf']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('NfcF identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading NfcF: $e');
+      }
+    }
+
+    // Try NfcV
+    if (data.containsKey('nfcv')) {
+      try {
+        final identifier = data['nfcv']['identifier'];
+        if (identifier != null) {
+          final id = List<int>.from(identifier);
+          debugPrint('NfcV identifier found: $id');
+          return _formatCardId(id);
+        }
+      } catch (e) {
+        debugPrint('Error reading NfcV: $e');
+      }
+    }
+
+    debugPrint('No valid identifier found in any NFC tech');
+    return null;
+  } catch (e) {
+    debugPrint('Error extracting card ID: $e');
+    return null;
   }
+}
 
   /// Safely cast tag.data to Map<String, dynamic>
   Map<String, dynamic> _castTagData(NfcTag tag) {

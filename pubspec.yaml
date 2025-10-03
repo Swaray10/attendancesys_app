@@ -1,4 +1,4 @@
-name: smart_attendance
+name: attendancesys_app
 description: NFC-based attendance management system for lecturers
 publish_to: 'none'
 version: 1.0.0+1
